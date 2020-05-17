@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title>島メロプレーヤー</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link href="css/style.css" rel="stylesheet">
+  </head>
+  <body class='bg'>
+    <script id="js">
+      const rawWidth = 1920, rawHeight = 1080, canvasWidth = 1280, canvasHeight = 720;
+      const wp = canvasWidth / rawWidth, hp = canvasHeight / rawHeight;
+      const scaleStartX = 205, scaleStartY = 190;
+      const animSpeed = 2.5;
+
+      let forEachScales = function (func) {
+        const y_max = 2, x_max = 8;
+        for (let y = 0; y < y_max; ++y) {
+          for (let x = 0; x < x_max; ++x) {
+            let index = (y * x_max + x);
+            func(x, y, index);
+          }
+        }
+      }
+
+      let scales = []
+      forEachScales(function(x, y, index) {
+        scales.push({ id:1, anim:0, offset: 0 });
+      });
+      let rects = []
+      forEachScales(function(x, y, index) {
+        const rectWidth = 150 * wp, rectHeight = 230 * hp;
+        rects.push({ x: scaleStartX + 110 * x, y: scaleStartY + 180 * y, width: rectWidth, height: rectHeight })
+      });
+
+      function main(context) {
+        setInterval(function() {
+          context.clearRect(0, 0, canvasWidth, canvasHeight);
+          context.drawImage(imageList[16], 0, 0, imageList[16].width * wp, imageList[16].height * hp);
+          forEachScales(function(x, y, index) {
+              let imageIndex = scales[index].id;
+              let offset = scales[index].offset;
+              switch (scales[index].anim) {
+                case 1: 
+                  if ((offset+=animSpeed) > 10) {
+                    scales[index].anim = 2;
+                  }
+                break;
+                case 3:
+                  if ((offset-=animSpeed) < 0) {
+                    offset = 0;
+                    scales[index].anim = 0;
+                  }
+                  break;
+              }
+              scales[index].offset = offset;
+              context.drawImage(imageList[imageIndex],
+                scaleStartX + 110 * x - offset, scaleStartY + 180 * y + (imageIndex * 5) - offset, 
+                (imageList[imageIndex].width + (offset * animSpeed)) * wp, (imageList[imageIndex].height + (offset * animSpeed)) * hp);
+          });
+          if (0) {
+            context.fillStyle = "rgba(128, 0, 0, 0.5)";
+            forEachScales(function(x, y, index) {
+                let rect = rects[index];
+                context.fillRect(rect.x, rect.y, rect.width, rect.height);
+            });
+          }
+        }, 66);
+      }
+
+      let isHitRect = function(rect, x, y) {
+        return x >= rect.x && x <= (rect.x + rect.width) && y >= rect.y && y <= (rect.y + rect.height);
+      }
+      function onClick(e) {
+        let px = e.clientX - canvas.offsetLeft;
+        let py = e.clientY - canvas.offsetTop;
+        forEachScales(function(x, y, index) {
+          let rect = rects[index];
+          if (isHitRect(rect, px, py) && ++scales[index].id >= 16) {
+            scales[index].id = 0;
+          }
+        });
+      }
+      function onMouseMove(e) {
+        let px = e.clientX - canvas.offsetLeft;
+        let py = e.clientY - canvas.offsetTop;
+        forEachScales(function(x, y, index) {
+          let rect = rects[index];
+          if (isHitRect(rect, px, py)) {
+            switch (scales[index].anim) {
+              case 0: scales[index].anim = 1; break;
+            }
+          } else {
+            switch (scales[index].anim) {
+              case 1: scales[index].anim = 3; break;
+              case 2: scales[index].anim = 3; break;
+            }
+          }
+        });
+      }
+    </script>
+    <div class="container bg">
+      <!--<h1>島メロプレーヤー</h1>-->
+      <div class="text-center">
+        <canvas id="canvas" width="1280" height="720"></canvas>
+      </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="./js/common/common.js"></script>
+    <script src="./js/resources.js"></script>
+    <script>
+      ShimaMeloPlayer.Common.initialize();
+      let imageList = ShimaMeloPlayer.Common.load([
+        ShimaMeloPlayer.Resources.S00, ShimaMeloPlayer.Resources.S01, ShimaMeloPlayer.Resources.S02, ShimaMeloPlayer.Resources.S03,
+        ShimaMeloPlayer.Resources.S04, ShimaMeloPlayer.Resources.S05, ShimaMeloPlayer.Resources.S06, ShimaMeloPlayer.Resources.S07,
+        ShimaMeloPlayer.Resources.S08, ShimaMeloPlayer.Resources.S09, ShimaMeloPlayer.Resources.S10, ShimaMeloPlayer.Resources.S11,
+        ShimaMeloPlayer.Resources.S12, ShimaMeloPlayer.Resources.S13, ShimaMeloPlayer.Resources.S14, ShimaMeloPlayer.Resources.S15,
+        ShimaMeloPlayer.Resources.BG], 
+      function(){
+        let canvas = ShimaMeloPlayer.Common.run(main);
+        canvas.addEventListener('click', onClick, false);
+        canvas.addEventListener('mousemove', onMouseMove, false);
+      });
+    </script>
+  </body>
+</html>

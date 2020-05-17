@@ -1,0 +1,46 @@
+body {
+  padding-top: 0px;
+}
+
+#canvas {
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.bg:before{
+  content: '';
+  background: inherit;
+  -webkit-filter: blur(8px);
+  -moz-filter: blur(8px);
+  -o-filter: blur(8px);
+  -ms-filter: blur(8px);
+  filter: blur(8px);
+  position: absolute;
+  top: -8px;
+  left: -8px;
+  right: -8px;
+  bottom: -8px;
+}
+
+.bg {
+  background-image: url(https://topics-cdn.nintendo.co.jp/uploads/images/2020/05/606102_02_13012816310031_jpg.jpg);
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-color: #464646;
+}
+/*
+.bg::after {
+  content: '';
+  background-color: rgba(255, 255, 255, .5);
+  background-size: cover;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+}
+*/
