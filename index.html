@@ -44,6 +44,7 @@
                 case 1: 
                   if ((offset+=animSpeed) > 10) {
                     scales[index].anim = 2;
+                    audioList[scales[index].id].play();
                   }
                 break;
                 case 3:
@@ -76,8 +77,11 @@
         let py = e.clientY - canvas.offsetTop;
         forEachScales(function(x, y, index) {
           let rect = rects[index];
-          if (isHitRect(rect, px, py) && ++scales[index].id >= 16) {
-            scales[index].id = 0;
+          if (isHitRect(rect, px, py)) {
+            if (++scales[index].id >= 16) {
+              scales[index].id = 0;
+            }
+            audioList[scales[index].id].play();
           }
         });
       }
@@ -111,16 +115,25 @@
     <script src="./js/resources.js"></script>
     <script>
       ShimaMeloPlayer.Common.initialize();
-      let imageList = ShimaMeloPlayer.Common.load([
-        ShimaMeloPlayer.Resources.S00, ShimaMeloPlayer.Resources.S01, ShimaMeloPlayer.Resources.S02, ShimaMeloPlayer.Resources.S03,
-        ShimaMeloPlayer.Resources.S04, ShimaMeloPlayer.Resources.S05, ShimaMeloPlayer.Resources.S06, ShimaMeloPlayer.Resources.S07,
-        ShimaMeloPlayer.Resources.S08, ShimaMeloPlayer.Resources.S09, ShimaMeloPlayer.Resources.S10, ShimaMeloPlayer.Resources.S11,
-        ShimaMeloPlayer.Resources.S12, ShimaMeloPlayer.Resources.S13, ShimaMeloPlayer.Resources.S14, ShimaMeloPlayer.Resources.S15,
-        ShimaMeloPlayer.Resources.BG], 
-      function(){
-        let canvas = ShimaMeloPlayer.Common.run(main);
-        canvas.addEventListener('click', onClick, false);
-        canvas.addEventListener('mousemove', onMouseMove, false);
+      let imageList = []
+      let audioList = ShimaMeloPlayer.Common.loadAudios([
+        ShimaMeloPlayer.Resources.Audio.S00, ShimaMeloPlayer.Resources.Audio.S01, ShimaMeloPlayer.Resources.Audio.S02, ShimaMeloPlayer.Resources.Audio.S03,
+        ShimaMeloPlayer.Resources.Audio.S04, ShimaMeloPlayer.Resources.Audio.S05, ShimaMeloPlayer.Resources.Audio.S06, ShimaMeloPlayer.Resources.Audio.S07,
+        ShimaMeloPlayer.Resources.Audio.S08, ShimaMeloPlayer.Resources.Audio.S09, ShimaMeloPlayer.Resources.Audio.S10, ShimaMeloPlayer.Resources.Audio.S11,
+        ShimaMeloPlayer.Resources.Audio.S12, ShimaMeloPlayer.Resources.Audio.S13, ShimaMeloPlayer.Resources.Audio.S14, ShimaMeloPlayer.Resources.Audio.S15
+      ],
+      function() {
+        imageList = ShimaMeloPlayer.Common.loadImages([
+          ShimaMeloPlayer.Resources.Image.S00, ShimaMeloPlayer.Resources.Image.S01, ShimaMeloPlayer.Resources.Image.S02, ShimaMeloPlayer.Resources.Image.S03,
+          ShimaMeloPlayer.Resources.Image.S04, ShimaMeloPlayer.Resources.Image.S05, ShimaMeloPlayer.Resources.Image.S06, ShimaMeloPlayer.Resources.Image.S07,
+          ShimaMeloPlayer.Resources.Image.S08, ShimaMeloPlayer.Resources.Image.S09, ShimaMeloPlayer.Resources.Image.S10, ShimaMeloPlayer.Resources.Image.S11,
+          ShimaMeloPlayer.Resources.Image.S12, ShimaMeloPlayer.Resources.Image.S13, ShimaMeloPlayer.Resources.Image.S14, ShimaMeloPlayer.Resources.Image.S15,
+          ShimaMeloPlayer.Resources.Image.BG], 
+        function() {
+          let canvas = ShimaMeloPlayer.Common.run(main);
+          canvas.addEventListener('click', onClick, false);
+          canvas.addEventListener('mousemove', onMouseMove, false);
+        });
       });
     </script>
   </body>

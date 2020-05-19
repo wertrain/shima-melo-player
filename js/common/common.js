@@ -8,7 +8,7 @@ var ShimaMeloPlayer = {};
 
   };
   
-  ShimaMeloPlayer.Common.load = function(fileList, loadComplete) {
+  ShimaMeloPlayer.Common.loadImages = function(fileList, loadComplete) {
     let imageList = []
     let loadedCount = 0;
     for (let i in fileList) {
@@ -21,6 +21,21 @@ var ShimaMeloPlayer = {};
       });
     }
     return imageList;
+  };
+
+  ShimaMeloPlayer.Common.loadAudios = function(fileList, loadComplete) {
+    let audioList = []
+    let loadedCount = 0;
+    for (let i in fileList) {
+      audioList[i] = new Audio();
+      audioList[i].src = fileList[i];
+      audioList[i].addEventListener("canplaythrough", function() {
+        if (++loadedCount >= audioList.length) {
+          loadComplete();
+        }
+      });
+    }
+    return audioList;
   };
 
   ShimaMeloPlayer.Common.run = function(drawFunc) {
