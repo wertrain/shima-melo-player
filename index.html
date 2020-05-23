@@ -11,7 +11,7 @@
       const rawWidth = 1920, rawHeight = 1080, canvasWidth = 1280, canvasHeight = 720;
       const wp = canvasWidth / rawWidth, hp = canvasHeight / rawHeight;
       const scaleStartX = 205, scaleStartY = 190;
-      const animSpeed = 2.5;
+      const animSpeed = 2;
 
       let forEachScales = function (func) {
         const y_max = 2, x_max = 8;
@@ -23,28 +23,57 @@
         }
       }
 
-      let scales = []
+      let scales = [];
+      let playbackRates = [];
       forEachScales(function(x, y, index) {
-        scales.push({ id:1, anim:0, offset: 0 });
+        scales.push({ id:1, anim:0, offset:0, playbackRate:1.0 });
+        playbackRates.push(1.0);
       });
-      let rects = []
+      let rects = [];
       forEachScales(function(x, y, index) {
         const rectWidth = 150 * wp, rectHeight = 230 * hp;
         rects.push({ x: scaleStartX + 110 * x, y: scaleStartY + 180 * y, width: rectWidth, height: rectHeight })
       });
+      let playButton = { anim:0, image:null, x:0, y:0, w:0, h:0, offset:0 };
 
+      let playing = false;
       function main(context) {
+
+        playButton.image = imageList[17];
+        playButton.x = canvasWidth / 2 - (playButton.image.width * wp / 2);
+        playButton.y = canvasHeight - (playButton.image.height * hp) * 2;
+        playButton.width = playButton.image.width * wp;
+        playButton.height = playButton.image.height * hp;
+
         setInterval(function() {
           context.clearRect(0, 0, canvasWidth, canvasHeight);
           context.drawImage(imageList[16], 0, 0, imageList[16].width * wp, imageList[16].height * hp);
+          
+          switch (playButton.anim) {
+            case 1: 
+              if ((playButton.offset+=animSpeed) > 10) {
+                playButton.anim = 2;
+              }
+              break;
+            case 3:
+              if ((playButton.offset-=animSpeed) < 0) {
+                playButton.offset = 0;
+                playButton.anim = 0;
+              }
+              break;
+          }
+          context.drawImage(
+              playButton.image, playButton.x - playButton.offset, playButton.y - playButton.offset, 
+              playButton.width + (playButton.offset * 2), playButton.height + (playButton.offset * 2));
+          
           forEachScales(function(x, y, index) {
-              let imageIndex = scales[index].id;
+              let resIndex = scales[index].id;
               let offset = scales[index].offset;
               switch (scales[index].anim) {
                 case 1: 
-                  if ((offset+=animSpeed) > 10) {
+                  if ((offset+=animSpeed) > 12) {
                     scales[index].anim = 2;
-                    audioList[scales[index].id].play();
+                    audioList[resIndex].play();
                   }
                 break;
                 case 3:
@@ -53,26 +82,51 @@
                     scales[index].anim = 0;
                   }
                   break;
+                case 10: 
+                  if ((offset+=animSpeed) > 12) {
+                    scales[index].anim = 3;
+                    audioList[resIndex].playbackRate = playbackRates[index];
+                    audioList[resIndex].play();
+                  }
+                  break;
               }
               scales[index].offset = offset;
-              context.drawImage(imageList[imageIndex],
-                scaleStartX + 110 * x - offset, scaleStartY + 180 * y + (imageIndex * 5) - offset, 
-                (imageList[imageIndex].width + (offset * animSpeed)) * wp, (imageList[imageIndex].height + (offset * animSpeed)) * hp);
+              context.drawImage(imageList[resIndex],
+                scaleStartX + 110 * x - offset, scaleStartY + 180 * y + (resIndex * 5) - offset, 
+                (imageList[resIndex].width + (offset * 3)) * wp, (imageList[resIndex].height + (offset * 3)) * hp);
           });
           if (0) {
             context.fillStyle = "rgba(128, 0, 0, 0.5)";
             forEachScales(function(x, y, index) {
-                let rect = rects[index];
-                context.fillRect(rect.x, rect.y, rect.width, rect.height);
+              let rect = rects[index];
+              context.fillRect(rect.x, rect.y, rect.width, rect.height);
             });
           }
         }, 33);
       }
-
+      let play = function() {
+        if (playing) return;
+        playing = true;
+        forEachScales(function(x, y, index) {
+          scales[index].anim = 0;
+          scales[index].offset = 0;
+        });
+        let index = 0;
+        scales[index].anim = 10;
+        let timer = setInterval(function() {
+          if (++index >= scales.length) {
+            clearInterval(timer);
+            playing = false;
+          } else {
+            scales[index].anim = 10;
+          }
+        }, 500);
+      }
       let isHitRect = function(rect, x, y) {
         return x >= rect.x && x <= (rect.x + rect.width) && y >= rect.y && y <= (rect.y + rect.height);
       }
       function onClick(e) {
+        if (playing) return;
         let px = e.clientX - canvas.offsetLeft;
         let py = e.clientY - canvas.offsetTop;
         forEachScales(function(x, y, index) {
@@ -81,11 +135,21 @@
             if (++scales[index].id >= 16) {
               scales[index].id = 0;
             }
-            audioList[scales[index].id].play();
+            let audioIndex = scales[index].id;
+            audioList[audioIndex].play();
+            setTimeout(function(index) {
+              audioList[index].pause();
+              audioList[index].currentTime = 0;
+            }, 1000);
           }
         });
+        if (isHitRect(playButton, px, py)) {
+          playButton.anim = 3;
+          play();
+        }
       }
       function onMouseMove(e) {
+        if (playing) return;
         let px = e.clientX - canvas.offsetLeft;
         let py = e.clientY - canvas.offsetTop;
         forEachScales(function(x, y, index) {
@@ -99,6 +163,38 @@
               case 1: scales[index].anim = 3; break;
               case 2: scales[index].anim = 3; break;
             }
+          }
+        });
+        if (isHitRect(playButton, px, py)) {
+          switch (playButton.anim) {
+              case 0: playButton.anim = 1; break;
+          }
+        }
+        else {
+          switch (playButton.anim) {
+            case 1: playButton.anim = 3; break;
+            case 2: playButton.anim = 3; break;
+          }
+        }
+      }
+      function onMouseWheel(e) {
+        if (e.preventDefault) {
+          e.preventDefault();
+        }
+        e.returnValue = false;
+        let px = e.clientX - canvas.offsetLeft;
+        let py = e.clientY - canvas.offsetTop;
+        forEachScales(function(x, y, index) {
+          let rect = rects[index];
+          if (isHitRect(rect, px, py)) {
+            if (e.wheelDelta < 0) {
+              if (++scales[index].id >= 16) {
+                scales[index].id = 15;
+              }
+            } else if (--scales[index].id < 0) {
+              scales[index].id = 0;
+            }
+            audioList[scales[index].id].play();
           }
         });
       }
@@ -128,11 +224,12 @@
           ShimaMeloPlayer.Resources.Image.S04, ShimaMeloPlayer.Resources.Image.S05, ShimaMeloPlayer.Resources.Image.S06, ShimaMeloPlayer.Resources.Image.S07,
           ShimaMeloPlayer.Resources.Image.S08, ShimaMeloPlayer.Resources.Image.S09, ShimaMeloPlayer.Resources.Image.S10, ShimaMeloPlayer.Resources.Image.S11,
           ShimaMeloPlayer.Resources.Image.S12, ShimaMeloPlayer.Resources.Image.S13, ShimaMeloPlayer.Resources.Image.S14, ShimaMeloPlayer.Resources.Image.S15,
-          ShimaMeloPlayer.Resources.Image.BG], 
+          ShimaMeloPlayer.Resources.Image.BG, ShimaMeloPlayer.Resources.Image.PBTN], 
         function() {
           let canvas = ShimaMeloPlayer.Common.run(main);
           canvas.addEventListener('click', onClick, false);
           canvas.addEventListener('mousemove', onMouseMove, false);
+          canvas.addEventListener('mousewheel', onMouseWheel, false);
         });
       });
     </script>
