@@ -24,10 +24,8 @@
       }
 
       let scales = [];
-      let playbackRates = [];
       forEachScales(function(x, y, index) {
         scales.push({ id:1, anim:0, offset:0, playbackRate:1.0 });
-        playbackRates.push(1.0);
       });
       let rects = [];
       forEachScales(function(x, y, index) {
@@ -41,7 +39,7 @@
 
         playButton.image = imageList[17];
         playButton.x = canvasWidth / 2 - (playButton.image.width * wp / 2);
-        playButton.y = canvasHeight - (playButton.image.height * hp) * 2;
+        playButton.y = canvasHeight - (playButton.image.height * hp) * 3;
         playButton.width = playButton.image.width * wp;
         playButton.height = playButton.image.height * hp;
 
@@ -51,7 +49,7 @@
           
           switch (playButton.anim) {
             case 1: 
-              if ((playButton.offset+=animSpeed) > 10) {
+              if ((playButton.offset+=animSpeed) > 6) {
                 playButton.anim = 2;
               }
               break;
@@ -85,7 +83,6 @@
                 case 10: 
                   if ((offset+=animSpeed) > 12) {
                     scales[index].anim = 3;
-                    audioList[resIndex].playbackRate = playbackRates[index];
                     audioList[resIndex].play();
                   }
                   break;
@@ -136,6 +133,7 @@
               scales[index].id = 0;
             }
             let audioIndex = scales[index].id;
+            audioList[audioIndex].playbackRate = 1.0;
             audioList[audioIndex].play();
             setTimeout(function(index) {
               audioList[index].pause();
