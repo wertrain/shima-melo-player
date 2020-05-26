@@ -25,7 +25,7 @@
 
       let scales = [];
       forEachScales(function(x, y, index) {
-        scales.push({ id:1, anim:0, offset:0, playbackRate:1.0 });
+        scales.push({ id:1, anim:0, offset:0 });
       });
       let rects = [];
       forEachScales(function(x, y, index) {
@@ -133,7 +133,6 @@
               scales[index].id = 0;
             }
             let audioIndex = scales[index].id;
-            audioList[audioIndex].playbackRate = 1.0;
             audioList[audioIndex].play();
             setTimeout(function(index) {
               audioList[index].pause();
