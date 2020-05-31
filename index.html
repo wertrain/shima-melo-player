@@ -23,9 +23,14 @@
         }
       }
 
+      const urlScales = urlToScales();
       let scales = [];
       forEachScales(function(x, y, index) {
-        scales.push({ id:1, anim:0, offset:0 });
+        let scale = urlScales[index];
+        if (isNaN(scale) || typeof(scale) === 'undefined') {
+          scale = 1;
+        }
+        scales.push({ id:scale, anim:0, offset:0 });
       });
       let rects = [];
       forEachScales(function(x, y, index) {
@@ -69,7 +74,7 @@
               let offset = scales[index].offset;
               switch (scales[index].anim) {
                 case 1: 
-                  if ((offset+=animSpeed) > 12) {
+                  if ((offset+=animSpeed) > 10) {
                     scales[index].anim = 2;
                     audioList[resIndex].play();
                   }
@@ -195,12 +200,36 @@
           }
         });
       }
+
+      function urlToScales() {
+        var params = Array.from(location.search.substring(1).split('&')[0]);
+        let scales = []
+        params.forEach (c =>scales.push(parseInt(c, 16)));
+        return scales;
+      }
+      console.log(scalesToUrl(scales));
+      function scalesToUrl(scales) {
+        let url = location.search.substring(0) + '&';
+        scales.forEach (function(scale){
+          url += scale.id.toString(16)
+        });
+        return url;
+      }
     </script>
     <div class="container bg">
       <!--<h1>島メロプレーヤー</h1>-->
       <div class="text-center">
         <canvas id="canvas" width="1280" height="720"></canvas>
+        <!--
+          <div class="form-group">
+           <button id="share" class="btn btn-primary">シェア！</button>
+           <div class="balloon-top">
+            <input type="text" class="form-control" readonly>
+          </div>
+        -->
+        </div>
       </div>
+    
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
