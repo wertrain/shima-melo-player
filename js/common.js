@@ -57,5 +57,5 @@ var ShimaMeloPlayer = {};
       array[i] = raw.charCodeAt(i);
     }
     return array;
-  }
+  };
 }
