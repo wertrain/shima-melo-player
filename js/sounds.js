@@ -3,7 +3,6 @@
 
   let _context = null;
   let _gain = null;
-  let _buffer = null;
 
   ShimaMeloPlayer.Sounds = {};
 
