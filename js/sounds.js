@@ -48,21 +48,39 @@
     // Create the instance of AudioBufferSourceNode
     var source = _context.createBufferSource();
 
-    var c = new Uint8Array(audioBuffer.length + audioBuffer.length);
-    c.set(audioBuffer);
+    // バッファとして複製
+    let frameCount = audioBuffer.sampleRate * audioBuffer.duration;
+    let buffer = _context.createBuffer(audioBuffer.numberOfChannels, frameCount, audioBuffer.sampleRate);
+
+    // UInt8Array から Float32Array 変換
+    // https://stackoverflow.com/questions/34669537/javascript-uint8array-to-float32array
+    let convertBlock = function(incomingData) { // incoming data is a UInt8Array
+      var i, l = incomingData.length;
+      var outputData = new Float32Array(incomingData.length);
+      for (i = 0; i < l; i++) {
+          outputData[i] = (incomingData[i] - 128) / 128.0;
+      }
+      return outputData;
+    }
+
+    for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+      buffer.copyFromChannel(convertBlock(audioBuffer), channel, 0);
+    }
     //c.set(audioBuffer, audioBuffer.length);
 
-    console.log(c);
+    console.log(buffer);
+    //console.log(audioBuffer);
     // Set the instance of AudioBuffer
-    //source.buffer = audioBuffer;
-    source.buffer = ShimaMeloPlayer.Sounds.createWhiteNoise(1.0);
+    source.buffer = buffer;
+    //source.buffer = ShimaMeloPlayer.Sounds.createWhiteNoise(1.0);
     // Set parameters
     //source.loop               = true;
     //source.loopStart          = 0.08;
     //source.loopEnd            = 0.083;
-    source.loop               = false;
+    //source.loop               = true;
     source.loopStart          = 0;
-    source.loopEnd            = audioBuffer.duration;
+    //source.loopEnd            = audioBuffer.duration;
+    source.loopEnd            = buffer.duration;
     //source.playbackRate.value = 0.1;
     
     source.connect(_context.destination);
