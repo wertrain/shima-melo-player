@@ -63,8 +63,15 @@
       return outputData;
     }
 
+    let block = convertBlock(audioBuffer);
     for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
-      buffer.copyFromChannel(convertBlock(audioBuffer), channel, 0);
+      // 実際のデータの配列を得る
+      var nowBuffering = buffer.getChannelData(channel);
+      for (var i = 0; i < frameCount; i++) {
+        nowBuffering[i] = block[i];
+        console.log(block);
+      }
+      console.log(nowBuffering);
     }
     //c.set(audioBuffer, audioBuffer.length);
 
