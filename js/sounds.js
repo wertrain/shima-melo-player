@@ -52,6 +52,7 @@
     if (isExtend) {
       for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
         let data = audioBuffer.getChannelData(channel);
+        let dataLength = data.length / 5;
         buffer.copyToChannel(data, channel, 0);
         buffer.copyToChannel(data, channel, buffer.length - data.length);
       }
