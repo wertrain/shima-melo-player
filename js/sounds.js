@@ -44,6 +44,32 @@
     return buffer;
   }
 
+  ShimaMeloPlayer.Sounds.play = function(audioBuffer, duration) {
+    let isExtend = (audioBuffer.duration < duration);
+    let frameCount = audioBuffer.sampleRate * (isExtend ? duration : audioBuffer.duration);
+    let buffer = _context.createBuffer(audioBuffer.numberOfChannels, frameCount, audioBuffer.sampleRate);
+
+    if (isExtend) {
+      for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+        let data = audioBuffer.getChannelData(channel);
+        buffer.copyToChannel(data, channel, 0);
+        buffer.copyToChannel(data, channel, buffer.length - data.length);
+      }
+    } else {
+      for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+        buffer.copyToChannel(audioBuffer.getChannelData(channel), channel, 0);
+      }
+    }
+
+    var source = _context.createBufferSource();
+    source.buffer = buffer;
+    //source.loop = true;
+    source.loopStart = 0;
+    source.loopEnd = buffer.duration;
+    source.connect(_context.destination);
+    source.start();
+  }
+
   ShimaMeloPlayer.Sounds.playAudio = function(audioBuffer) {
     // Create the instance of AudioBufferSourceNode
     var source = _context.createBufferSource();
@@ -63,19 +89,21 @@
       return outputData;
     }
 
-    let block = convertBlock(audioBuffer);
     for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
-      // 実際のデータの配列を得る
-      var nowBuffering = buffer.getChannelData(channel);
-      for (var i = 0; i < frameCount; i++) {
-        nowBuffering[i] = block[i];
-        console.log(block);
-      }
-      console.log(nowBuffering);
+      buffer.copyToChannel(audioBuffer.getChannelData(channel), channel, 0);
     }
+    console.log(buffer);
+    // let block = convertBlock(audioBuffer);
+    // for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
+    //   // 実際のデータの配列を得る
+    //   var nowBuffering = buffer.getChannelData(channel);
+    //   for (var i = 0; i < frameCount; i++) {
+    //     nowBuffering[i] = block[i];
+    //   }
+    // }
     //c.set(audioBuffer, audioBuffer.length);
 
-    console.log(buffer);
+
     //console.log(audioBuffer);
     // Set the instance of AudioBuffer
     source.buffer = buffer;
