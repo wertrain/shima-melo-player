@@ -52,9 +52,21 @@
     if (isExtend) {
       for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
         let data = audioBuffer.getChannelData(channel);
-        let dataLength = data.length / 5;
-        buffer.copyToChannel(data, channel, 0);
-        buffer.copyToChannel(data, channel, buffer.length - data.length);
+        let newData = new Float32Array(frameCount);
+        let offsetDataLength = data.length / 5;
+        let index = 0;
+        for (let i = 0; i < offsetDataLength; ++i) {
+          newData[index++] = data[i];
+        }
+        for (let i = 0; i < data.length - offsetDataLength; ++i) {
+          newData[index++] = data[offsetDataLength + i];
+        }
+        for (let i = 0; i < offsetDataLength; ++i) {
+          newData[index++] = data[(data.length - offsetDataLength) + i];
+        }
+        buffer.copyToChannel(newData, channel, 0);
+        //buffer.copyToChannel(data, channel, 0);
+        //buffer.copyToChannel(data, channel, buffer.length - data.length);
       }
     } else {
       for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
