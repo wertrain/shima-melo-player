@@ -53,13 +53,18 @@
       for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
         let data = audioBuffer.getChannelData(channel);
         let newData = new Float32Array(frameCount);
-        let offsetDataLength = data.length / 5;
+        let offsetDataLength = data.length / 2.5;
+
         let index = 0;
         for (let i = 0; i < offsetDataLength; ++i) {
           newData[index++] = data[i];
         }
-        for (let i = 0; i < data.length - offsetDataLength; ++i) {
-          newData[index++] = data[offsetDataLength + i];
+        let copyIndex = offsetDataLength;
+        for (let i = 0; i < frameCount - offsetDataLength; ++i) {
+          if (++copyIndex > data.length - offsetDataLength) {
+            copyIndex = offsetDataLength;
+          }
+          newData[index++] = data[copyIndex];
         }
         for (let i = 0; i < offsetDataLength; ++i) {
           newData[index++] = data[(data.length - offsetDataLength) + i];
@@ -105,7 +110,7 @@
     for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
       buffer.copyToChannel(audioBuffer.getChannelData(channel), channel, 0);
     }
-    console.log(buffer);
+
     // let block = convertBlock(audioBuffer);
     // for (var channel = 0; channel < audioBuffer.numberOfChannels; channel++) {
     //   // 実際のデータの配列を得る
