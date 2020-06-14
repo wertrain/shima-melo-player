@@ -256,13 +256,6 @@
           canvas.addEventListener('mousemove', onMouseMove, false);
           canvas.addEventListener('mousewheel', onMouseWheel, false);
         });
-        let audioContext = ShimaMeloPlayer.Sounds.initialize();
-        //console.log(audioContext)
-        let binary = ShimaMeloPlayer.Common.convertDataURIToBinary(ShimaMeloPlayer.Resources.Audio.S01);
-        audioContext.decodeAudioData(binary).then(function(decodedData) {
-          //console.log(decodedData);
-          ShimaMeloPlayer.Sounds.playAudio(decodedData);
-        });
       });
     </script>
   </body>

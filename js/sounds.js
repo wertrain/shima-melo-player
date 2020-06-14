@@ -20,6 +20,7 @@
     return _context;
   };
 
+  // ホワイトノイズを作成する
   ShimaMeloPlayer.Sounds.createWhiteNoise = function(seconds) {
     // ステレオ
     const channels = 2;
@@ -44,6 +45,8 @@
     return buffer;
   }
 
+  // 指定されたサウンドを再生を指定された時間で再生する
+  // 不足分はバッファを連続してコピーさせる
   ShimaMeloPlayer.Sounds.play = function(audioBuffer, duration) {
     let isExtend = (audioBuffer.duration < duration);
     let frameCount = audioBuffer.sampleRate * (isExtend ? duration : audioBuffer.duration);
